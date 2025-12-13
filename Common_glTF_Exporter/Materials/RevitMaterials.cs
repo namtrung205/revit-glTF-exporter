@@ -63,27 +63,29 @@ namespace Common_glTF_Exporter.Export
             List<glTFImage> images, BaseMaterial material)
         {
 
-                float opacity = ONEINTVALUE - (float)node.Transparency;
+            float opacity = ONEINTVALUE - (float)node.Transparency;
 
-                material.name = revitMaterial.Name;
-                MaterialProperties.SetProperties(node, opacity, ref material);
+            material.name = revitMaterial.Name;
+            MaterialProperties.SetProperties(revitMaterial, opacity, ref material);
 
-                (Autodesk.Revit.DB.Color, Autodesk.Revit.DB.Color) baseNTintColour = (null, null);
+            (Autodesk.Revit.DB.Color, Autodesk.Revit.DB.Color) baseNTintColour = (null, null);
 
-                if (revitMaterial != null && preferences.materials == MaterialsEnum.textures)
-                {
-                    baseNTintColour = MaterialTextures.SetMaterialTextures(revitMaterial, material, doc, opacity, textures, images);
-                    material.baseColorFactor = MaterialProperties.GetDefaultColour(opacity);
-                }
+            if (revitMaterial != null && preferences.materials == MaterialsEnum.textures)
+            {
+                baseNTintColour = MaterialTextures.SetMaterialTextures(revitMaterial, material, doc, opacity, textures, images);
+                material.baseColorFactor = MaterialProperties.GetDefaultColour(opacity);
+            }
 
-                if (material.hasTexture)
-                {
-                    material.baseColorFactor = MaterialProperties.GetDefaultColour(opacity);
-                }
-                else
-                {
-                    material.baseColorFactor = MaterialProperties.SetMaterialColour(node, opacity, baseNTintColour.Item1, baseNTintColour.Item2);
-                }
+            if (material.hasTexture)
+            {
+                material.baseColorFactor = MaterialProperties.GetDefaultColour(opacity);
+            }
+            else
+            {
+                material.baseColorFactor = MaterialProperties.SetMaterialColour(node, opacity, baseNTintColour.Item1, baseNTintColour.Item2);
+            }
+
+            MaterialProperties.SetPropertiesFromAsset(doc, revitMaterial, ref material);
 
             return material;
         }

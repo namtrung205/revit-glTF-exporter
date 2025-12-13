@@ -14,7 +14,7 @@ namespace Common_glTF_Exporter.Materials
             { "ConcreteSchema", Autodesk.Revit.DB.Visual.Concrete.ConcreteBmMap },
             { "PrismGenericSchema", Autodesk.Revit.DB.Visual.Generic.GenericDiffuse },
             { "GenericSchema", Autodesk.Revit.DB.Visual.Generic.GenericDiffuse },
-            { "PrismMetalSchema", Autodesk.Revit.DB.Visual.AdvancedMetal.SurfaceAlbedo },
+            { "PrismMetalSchema", Autodesk.Revit.DB.Visual.AdvancedMetal.MetalF0 },
             { "PrismWoodSchema", Autodesk.Revit.DB.Visual.AdvancedWood.WoodCurlyDistortionMap },
             { "HardwoodSchema", Autodesk.Revit.DB.Visual.Hardwood.HardwoodColor },
             { "PrismMasonryCMUSchema", Autodesk.Revit.DB.Visual.MasonryCMU.MasonryCMUColor },
@@ -208,6 +208,74 @@ namespace Common_glTF_Exporter.Materials
             }
 
             return 1;
+        }
+
+
+        private static readonly Dictionary<string, string> MetallicMap = new Dictionary<string, string>
+        {
+            //{ "PrismGenericSchema", Generic.GenericDiffuse },
+            //{ "ConcreteSchema", Concrete.ConcreteColor },
+            //{ "WallPaintSchema", WallPaint.WallpaintColor },
+            //{ "PlasticVinylSchema", PlasticVinyl.PlasticvinylColor },
+            //{ "MetallicPaintSchema", MetallicPaint.MetallicpaintBaseColor },
+            //{ "CeramicSchema", Ceramic.CeramicColor },
+            //{ "MetalSchema", Metal.MetalColor },
+            { "PrismMetalSchema", AdvancedMetal.SurfaceAlbedo },
+            //{ "PrismOpaqueSchema", AdvancedOpaque.OpaqueAlbedo },
+            //{ "PrismLayeredSchema", AdvancedLayered.LayeredDiffuse },
+            //{ "GenericSchema", Generic.GenericDiffuse },
+            //{ "AdvancedMetalSchema", AdvancedMetal.SurfaceAlbedo }
+        };
+
+        public static float GetMetallicFactor(Asset theAsset, string baseSchema)
+        {
+            float ret = 0;
+
+            if (theAsset == null || string.IsNullOrEmpty(baseSchema))
+                return ret;
+
+            if (!MetallicMap.TryGetValue(baseSchema, out string colorPropertyName))
+                return ret;
+
+            var colorProperty = theAsset.FindByName(colorPropertyName) as AssetPropertyDoubleArray4d;
+
+            if (colorProperty != null)
+            {
+                IList<double> colorValues = colorProperty.GetValueAsDoubles();
+                ret = (float)(0.2126f * colorValues[0] + 0.7152f * colorValues[1] + 0.0722f * colorValues[2]);
+            }
+            return ret;
+        }
+
+
+        private static readonly Dictionary<string, string> RoughnessMap = new Dictionary<string, string>
+        {
+            //{ "PrismGenericSchema", Generic.GenericDiffuse },
+            //{ "ConcreteSchema", Concrete.ConcreteColor },
+            //{ "WallPaintSchema", WallPaint.WallpaintColor },
+            //{ "PlasticVinylSchema", PlasticVinyl.PlasticvinylColor },
+            //{ "MetallicPaintSchema", MetallicPaint.MetallicpaintBaseColor },
+            //{ "CeramicSchema", Ceramic.CeramicColor },
+            //{ "MetalSchema", Metal.MetalColor },
+            { "PrismMetalSchema", AdvancedMetal.SurfaceRoughness },
+            //{ "PrismOpaqueSchema", AdvancedOpaque.OpaqueAlbedo },
+            //{ "PrismLayeredSchema", AdvancedLayered.LayeredDiffuse },
+            //{ "GenericSchema", Generic.GenericDiffuse },
+            //{ "AdvancedMetalSchema", AdvancedMetal.SurfaceAlbedo }
+        };
+
+        public static float GetRoughnessFactor(Asset theAsset, string baseSchema)
+        {
+            float ret = 0;
+
+            if (theAsset == null || string.IsNullOrEmpty(baseSchema))
+                return ret;
+
+            if (!RoughnessMap.TryGetValue(baseSchema, out string colorPropertyName))
+                return ret;
+
+            ret = (float)(theAsset.FindByName(colorPropertyName) as AssetPropertyDouble)?.Value;
+            return ret;
         }
     }
 }

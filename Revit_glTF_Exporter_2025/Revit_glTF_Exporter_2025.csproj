@@ -101,8 +101,21 @@
 	<ItemGroup>
 	  <Folder Include="Resources\" />
 	</ItemGroup>
+	<ItemGroup>
+	  <Compile Update="Properties\Settings.Designer.cs">
+	    <DesignTimeSharedInput>True</DesignTimeSharedInput>
+	    <AutoGen>True</AutoGen>
+	    <DependentUpon>Settings.settings</DependentUpon>
+	  </Compile>
+	</ItemGroup>
+	<ItemGroup>
+	  <None Update="Properties\Settings.settings">
+	    <Generator>SettingsSingleFileGenerator</Generator>
+	    <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+	  </None>
+	</ItemGroup>
 	<Import Project="..\Common_glTF_Exporter\Common_glTF_Exporter.projitems" Label="Shared" />
 	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
-	  <Exec Command="If &quot;%25CI%25&quot;==&quot;true&quot; (&#xD;&#xA;    &quot;C:\Users\runneradmin\.nuget\packages\signtool\10.0.17763.132\tools\signtool.exe&quot; sign /f $(CERTIFICATE_LOCATION) /p $(CERTIFICATE_KEY) /t http://timestamp.digicert.com &quot;$(ProjectDir)$(OutputPath)Leia_glTF_Exporter.dll&quot;&#xD;&#xA;)" />
+	  <Exec Command="if $(ConfigurationName) == Debug (&#xD;&#xA;    copy &quot;$(ProjectDir)$(OutputPath)*.dll&quot; &quot;$(APPDATA)\Autodesk\ApplicationPlugins\leia.bundle\Contents\2025\&quot;&#xD;&#xA;)&#xD;&#xA;&#xD;&#xA;If &quot;%25CI%25&quot;==&quot;true&quot; (&#xD;&#xA;    &quot;C:\Users\runneradmin\.nuget\packages\signtool\10.0.17763.132\tools\signtool.exe&quot; sign /f $(CERTIFICATE_LOCATION) /p $(CERTIFICATE_KEY) /t http://timestamp.digicert.com &quot;$(ProjectDir)$(OutputPath)Leia_glTF_Exporter.dll&quot;&#xD;&#xA;)" />
 	</Target>
 </Project>

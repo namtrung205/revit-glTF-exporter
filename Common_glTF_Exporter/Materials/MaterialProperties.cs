@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.IO.Ports;
 using System.Linq;
+using System.Windows.Controls;
 using System.Xml.Linq;
 using Autodesk.Revit.DB;
+using Autodesk.Revit.DB.Visual;
 using Common_glTF_Exporter.Core;
 using Common_glTF_Exporter.Model;
 using glTF.Manipulator.GenericSchema;
@@ -15,7 +17,7 @@ namespace Common_glTF_Exporter.Materials
     {
         private const string BLEND = "BLEND";
         private const string OPAQUE = "OPAQUE";
-        public static void SetProperties(MaterialNode node, float opacity, ref BaseMaterial material)
+        public static void SetProperties(Autodesk.Revit.DB.Material revitMaterial, float opacity, ref BaseMaterial material)
         {
             material.metallicFactor = 0f;
             material.roughnessFactor = opacity != 1 ? 0.5f : 1f;
@@ -92,5 +94,36 @@ namespace Common_glTF_Exporter.Materials
                 ? srgb / 12.92f
                 : (float)Math.Pow((srgb + 0.055f) / 1.055f, 2.4);  // System.Math
         }
+
+        //Some properties control by asset (rounghness, metallic)
+        public static void SetPropertiesFromAsset(Document doc, Autodesk.Revit.DB.Material revitMaterial, ref BaseMaterial material)
+        {
+            ElementId appearanceId = revitMaterial.AppearanceAssetId;
+            if (appearanceId == ElementId.InvalidElementId)
+            {
+                return;
+            }
+
+            var appearanceElem = doc.GetElement(appearanceId) as AppearanceAssetElement;
+            if (appearanceElem == null)
+            {
+                return;
+            }
+
+            Asset theAsset = appearanceElem.GetRenderingAsset();
+            AssetPropertyString baseSchema = theAsset.FindByName("BaseSchema") as AssetPropertyString;
+            if (baseSchema == null)
+            {
+                return;
+            }
+            string schemaName = baseSchema.Value;
+            var metallicFactor = AssetPropertiesUtils.GetMetallicFactor(theAsset, schemaName);
+            var roughnessFactor = AssetPropertiesUtils.GetRoughnessFactor(theAsset, schemaName);
+
+            //Set
+            material.metallicFactor = metallicFactor;
+            material.roughnessFactor = roughnessFactor;
+        }
+
     }
 }
