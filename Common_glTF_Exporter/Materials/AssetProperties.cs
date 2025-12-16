@@ -266,7 +266,7 @@ namespace Common_glTF_Exporter.Materials
 
         public static float GetRoughnessFactor(Asset theAsset, string baseSchema)
         {
-            float ret = 0;
+            float ret = 1;
 
             if (theAsset == null || string.IsNullOrEmpty(baseSchema))
                 return ret;
