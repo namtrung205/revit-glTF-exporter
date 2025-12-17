@@ -1,0 +1,38 @@
+name: SonarCloud
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+  sonarcloud:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # cần để SonarCloud lấy SCM info
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '8.x'  # hoặc version .NET bạn dùng
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Build
+        run: dotnet build --no-restore
+
+      - name: SonarCloud Scan
+        uses: sonarsource/sonarqube-scan-action@v5
+        with:
+          # Dùng Organization & Project keys bạn lấy từ SonarCloud
+          sonarcloud-token: ${{ secrets.SONAR_TOKEN }}
+          projectKey: "namtrung205_revit-glTF-exporter"
+          projectName: "revit-glTF-exporter"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
